@@ -26,7 +26,10 @@ void Character::set_att(int att){this -> att = att;}
 void Character::set_def(int def){this -> def = def;}
 
 void Hero::set_abilitie(std::vector<int> abilities){this -> abilities = abilities;}
-std::vector<int> Hero::get_abilities(){return abilities;}
+std::vector<int> Hero::get_abilities() const {return abilities;}
+
+void Villan::set_stunned(bool state){this->stunned = state;}
+bool Villan::get_stunned() const {return stunned;}
 
 int random_nbr(int min, int max){
     std::uniform_int_distribution<> dist(min, max);
@@ -102,11 +105,11 @@ bool Hero::hero_dodged(){
     return elapsed.count() <= 3;
 }
 
-void Hero::use_ability(Character& target, int ability){
+void Hero::use_ability(Villan& target, int ability){
     return;
 }
 
-void Mage::use_ability(Character &target, int ability){
+void Mage::use_ability(Villan &target, int ability){
     int nbr_uta = get_abilities().size();
     if(ability > nbr_uta){
         std::cout << "u have no shuch ability like this!!\n";
@@ -125,27 +128,27 @@ void Mage::use_ability(Character &target, int ability){
     }
 }
 
-void Assassin::use_ability(Character &target, int ability){
+void Spartan::use_ability(Villan &target, int ability){
     int nbr_uta = get_abilities().size();
     if(ability > nbr_uta){
         std::cout << "u have no shuch ability like this!!\n";
     }else{
         switch(ability){
             case 1:
-                std::cout << "u've used ur sheiled to tackle\nnow" << target.get_name() << 
-                "is stant for 5sec !\n";
+                std::cout << "u've used ur sheiled to tackle " << target.get_name() << 
+                "\nnow he's stant for 5sec !\n";
 
+                target.set_stunned(true);
                 break;
             case 2:
                 break;
             case 3:
                 break;
         }
-
     }
 }
 
-void Spartan::use_ability(Character &target, int ability){
+void Assassin::use_ability(Villan &target, int ability){
     int nbr_uta = get_abilities().size();
     if(ability > nbr_uta){
         std::cout << "u have no shuch ability like this!!\n";
@@ -164,4 +167,18 @@ void Spartan::use_ability(Character &target, int ability){
         }
 
     }
+}
+
+void Character::hpBar(int hp) const {
+
+    int curHp = (get_hp() * 100)/ hp;
+
+    std::cout << get_name() <<" "<< get_hp() << " HP [";
+    for(int i=0; i<curHp; i++){
+        std::cout << "#";
+    }
+    for(int j=0; j<100 - curHp; j++){
+        std::cout << ".";
+    }
+    std::cout << "]\n";
 }

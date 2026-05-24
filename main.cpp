@@ -62,14 +62,21 @@ int main(){
     std::cout << "\n";
 
     std::cout << "a: Attack\n"
-                "d: dodge\n";
+                "d: dodge\n"
+                "e: spical attack\n";
 
     bool att_cooldown = true;
     bool villan_att = false;
     bool dodged = false;
     bool warning = false;
+    bool abi_cooldown = true;
+    bool render = true;
     auto lastAtt = std::chrono::steady_clock::now();
     auto lastVillAtt = std::chrono::steady_clock::now();
+    auto lastAbi = std::chrono::steady_clock::now();
+    auto lastRender = std::chrono::steady_clock::now();
+    int initHp = hero->get_hp();
+    int vInitHp = v.get_hp();
     while(v.is_alive() && hero->is_alive()){
 
         if(!att_cooldown){
@@ -84,6 +91,21 @@ int main(){
             }
             if (timer(3, lastVillAtt)){
                 villan_att = true;
+            }
+        }
+        if(!abi_cooldown){
+            if(timer(3, lastAbi) && !v.get_stunned()){
+                abi_cooldown = true;
+            }
+        }
+        if(v.get_stunned()){
+            if(timer(5, lastAbi)){
+                v.set_stunned(false);
+            }
+        }
+        if(!render){
+            if(timer(3, lastRender)){
+                render = true;
             }
         }
 
@@ -116,10 +138,19 @@ int main(){
                 }
             }
 
-            
+            if(key == 'e' || key == 'E'){
+                if(abi_cooldown){
+                    lastAbi = std::chrono::steady_clock::now();
+                    hero->use_ability(v, 1);
+                    
+                    abi_cooldown = false;
+                }else{
+                    std::cout << "on cooldown!\n";
+                }
+            }
         }
 
-        if(villan_att){
+        if(villan_att && !v.get_stunned()){
             if(!dodged){
                 lastVillAtt = std::chrono::steady_clock::now();
 
@@ -133,6 +164,14 @@ int main(){
                 villan_att = false;
                 dodged = false;
             }
+        }
+
+        if(render){
+            lastRender = std::chrono::steady_clock::now();
+
+            hero->hpBar(initHp);
+            v.hpBar(vInitHp);
+            render = false;
         }
     }
 

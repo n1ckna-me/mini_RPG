@@ -1,6 +1,8 @@
 #include <string>
 #include <vector>
 
+class Villan;
+
 class Character{
     private:
         std::string name;
@@ -28,6 +30,7 @@ class Character{
         bool is_alive() const;
         virtual void take_damage(int dmg);
         virtual void attack(Character& target, int att_dmg);
+        void hpBar(int hp) const;
 };
 
 class Hero : public Character{
@@ -39,37 +42,42 @@ class Hero : public Character{
             abilities(abilities) {}
 
         void set_abilitie(std::vector<int> abilities);
-        std::vector<int> get_abilities();
+        std::vector<int> get_abilities() const;
 
         int add_dmg();
         void attack(Character& target, int att_dmg) override;
         bool hero_dodged();
-        virtual void use_ability(Character& target, int ability);
+        virtual void use_ability(Villan& target, int ability);
 };
 
 class Mage : public Hero{
     public:
         Mage(std::string name, int hp, int speed, int att, int def, std::vector <int> abilities)
             : Hero(name, hp, speed, att, def, abilities) {}
-        void use_ability(Character& target, int ability) override;
+        void use_ability(Villan& target, int ability) override;
 };
 class Spartan : public Hero{
     public:
         Spartan(std::string name, int hp, int speed, int att, int def, std::vector <int> abilities)
             : Hero(name, hp, speed, att, def, abilities) {}
-        void use_ability(Character& target, int ability) override;
+        void use_ability(Villan& target, int ability) override;
 };
 class Assassin : public Hero{
     public:
         Assassin(std::string name, int hp, int speed, int att, int def, std::vector <int> abilities)
             : Hero(name, hp, speed, att, def, abilities) {}
-        void use_ability(Character& target, int ability) override;
+        void use_ability(Villan& target, int ability) override;
 };
 
 class Villan : public Character{
+    private:
+        bool stunned;
     public:
         Villan(std::string name, int hp, int speed, int att, int def)
-            : Character(name, hp, speed, att, def) {}
+            : Character(name, hp, speed, att, def), stunned(false) {}
+
+        bool get_stunned() const;
+        void set_stunned(bool state);
         
         void take_damage(int dmg) override;
         void attack(Character& target, int att_dmg) override;
