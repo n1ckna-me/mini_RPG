@@ -1,8 +1,12 @@
 #include<iostream>
-#include "Characters.h"
 #include<string>
 #include<conio.h>
 #include<chrono>
+#include<cstdlib>
+#include "Characters.h"
+#include "bonus.h"
+
+int random_nbr(int min, int max);
 
 bool timer(int sec, auto& last){
     auto curTime = std::chrono::steady_clock::now();
@@ -36,21 +40,21 @@ int main(){
 
     switch(intInput){
         case 1 :{
-            hero = new Mage("Mage", 200, 5, 20, 10, {1});
+            hero = new Mage("Mage", 200, 5, 20, 10, 200, {1});
             std::cout << "the Mage has the bigest hp, the harest attack,\n" <<
                 "but she's slow and her defence is mid.\n" <<
                 "Her specila attack is to double her attack!!";
             break;
         }
         case 2 :{
-            hero = new Spartan("Spartan", 150, 3, 15, 15, {1});
+            hero = new Spartan("Spartan", 200, 3, 15, 15, 200, {1});
             std::cout << "The Spartan has mid hp and attack, but he has the heviest sheiled\n" <<
                 "and of cours that slow him down!\n" <<
                 "His special attack is to tackel the villan and stun him for 5sec!!";
             break;
         }
         case 3 :{
-            hero = new Assassin("Assassin", 150, 10, 15, 5, {1});
+            hero = new Assassin("Assassin", 200, 10, 15, 5, 200, {1});
             std::cout << "The Assassin the quick one, allthought he has a mid hp and a light sheild,\n" <<
                 "but his speed give him the ability to dodge and attack multiple time.\n" <<
                 "his spicial attack is to attack 4 time in row with half the power!\n";
@@ -58,7 +62,7 @@ int main(){
         }
     };
 
-    Villan v("Monster", 400, 5, 30, 10);
+    Villan v("Monster", 50, 5, 30, 10, 50);
     std::cout << "\n";
 
     std::cout << "a: Attack\n"
@@ -75,8 +79,7 @@ int main(){
     auto lastVillAtt = std::chrono::steady_clock::now();
     auto lastAbi = std::chrono::steady_clock::now();
     auto lastRender = std::chrono::steady_clock::now();
-    int initHp = hero->get_hp();
-    int vInitHp = v.get_hp();
+
     while(v.is_alive() && hero->is_alive()){
 
         if(!att_cooldown){
@@ -104,7 +107,7 @@ int main(){
             }
         }
         if(!render){
-            if(timer(3, lastRender)){
+            if(timer(1, lastRender)){
                 render = true;
             }
         }
@@ -169,11 +172,36 @@ int main(){
         if(render){
             lastRender = std::chrono::steady_clock::now();
 
-            hero->hpBar(initHp);
-            v.hpBar(vInitHp);
+            hero->hpBar();
+            v.hpBar();
             render = false;
         }
     }
+
+    Bonus heal(BonusType::heal, random_nbr(40, 80));
+    Bonus att(BonusType::att, random_nbr(5, 15));
+    Bonus def(BonusType::def, random_nbr(5, 20));
+
+    std::cout << "u've killed the monster, and now u have 3 bonuses to choose from :\n"
+              << "1: healing " << heal.get_value() << "%\n"
+              << "2: attack increase " << att.get_value() << "%\n"
+              << "3: defense increase " << def.get_value() << "%\n"
+              << "choose the convient nbr :";
+    std::cin >> intInput;
+
+    switch(intInput){
+        case 1:
+            heal.apply(*hero);
+            break;
+        case 2:
+            att.apply(*hero);
+            break;
+        case 3:
+            def.apply(*hero);
+            break;
+    }
+
+    hero->show_stats();
 
     return 0;
 }

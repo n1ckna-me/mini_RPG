@@ -5,12 +5,18 @@
 
 std::mt19937 gen(std::random_device{}());
 
-Character::Character(std::string name, int hp, int speed, int att, int def){
+int random_nbr(int min, int max){
+    std::uniform_int_distribution<> dist(min, max);
+    return dist(gen);
+}
+
+Character::Character(std::string name, int hp, int speed, int att, int def, int maxHp){
     this -> name = name;
     this -> hp = hp;
     this -> speed = speed;
     this -> att = att;
     this -> def = def;
+    this -> maxHp = maxHp;
 }
 
 std::string Character::get_name() const{return name;}
@@ -18,23 +24,20 @@ int Character::get_hp() const{return hp;}
 int Character::get_speed() const{return speed;}
 int Character::get_att() const{return att;}
 int Character::get_def() const{return def;}
+int Character::get_maxHp() const{return maxHp;}
 
 void Character::set_name(std::string name){this -> name = name;}
 void Character::set_speed(int speed){this -> speed = speed;}
 void Character::set_hp(int hp){this -> hp = hp;}
 void Character::set_att(int att){this -> att = att;}
 void Character::set_def(int def){this -> def = def;}
+void Character::set_maxHp(int maxHp){this->maxHp = maxHp;}
 
 void Hero::set_abilitie(std::vector<int> abilities){this -> abilities = abilities;}
-std::vector<int> Hero::get_abilities() const {return abilities;}
+std::vector<int> Hero::get_abilities() const{return abilities;}
 
 void Villan::set_stunned(bool state){this->stunned = state;}
-bool Villan::get_stunned() const {return stunned;}
-
-int random_nbr(int min, int max){
-    std::uniform_int_distribution<> dist(min, max);
-    return dist(gen);
-}
+bool Villan::get_stunned() const{return stunned;}
 
 bool Character::is_alive() const{
     return hp > 0;
@@ -169,9 +172,9 @@ void Assassin::use_ability(Villan &target, int ability){
     }
 }
 
-void Character::hpBar(int hp) const {
+void Character::hpBar() const{
 
-    int curHp = (get_hp() * 100)/ hp;
+    int curHp = (get_hp() * 100)/ get_maxHp();
 
     std::cout << get_name() <<" "<< get_hp() << " HP [";
     for(int i=0; i<curHp; i++){
@@ -181,4 +184,13 @@ void Character::hpBar(int hp) const {
         std::cout << ".";
     }
     std::cout << "]\n";
+}
+
+void Hero::show_stats() const{
+    std::cout << "Hero stats ("<< get_name() <<") : \n"
+              <<"* Attack : " << get_att()
+              << "\n* Defense : " << get_def()
+              << "\n* Speed : " << get_speed() << "\n";
+
+    Character::hpBar();
 }
