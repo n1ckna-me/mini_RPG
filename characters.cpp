@@ -1,14 +1,9 @@
 #include<iostream>
-#include<random>
 #include<chrono>
 #include "Characters.h"
 
-std::mt19937 gen(std::random_device{}());
-
-int random_nbr(int min, int max){
-    std::uniform_int_distribution<> dist(min, max);
-    return dist(gen);
-}
+int random_nbr(int min, int max);
+int input_check();
 
 Character::Character(std::string name, int hp, int speed, int att, int def, int maxHp){
     this -> name = name;
@@ -33,8 +28,11 @@ void Character::set_att(int att){this -> att = att;}
 void Character::set_def(int def){this -> def = def;}
 void Character::set_maxHp(int maxHp){this->maxHp = maxHp;}
 
-void Hero::set_abilitie(std::vector<int> abilities){this -> abilities = abilities;}
-std::vector<int> Hero::get_abilities() const{return abilities;}
+void Hero::set_abiVal(int abiVal){this->abiVal = abiVal;}
+void Hero::set_abiCooldown(int abiCooldown){this->abiCooldown = abiCooldown;}
+
+int Hero::get_abiVal() const{return abiVal;}
+int Hero::get_abiCooldown() const{return abiCooldown;}
 
 void Villan::set_stunned(bool state){this->stunned = state;}
 bool Villan::get_stunned() const{return stunned;}
@@ -49,7 +47,7 @@ void Character::take_damage(int dmg){
 }
 
 void Villan::take_damage(int dmg){
-    int shield_bonus = random_nbr(0, 50);
+    int shield_bonus = random_nbr(0, 30);
     int bonus_def = (shield_bonus * get_def()) / 100;
 
     int total_def = get_def() + bonus_def;
@@ -68,8 +66,22 @@ void Character::attack(Character& target, int att_dmg){
     target.take_damage(dmg);
 }
 
+float Character::att_Cooldown(int baseCooldown) const{
+    float cooldown = baseCooldown * (10.0f / get_speed());
+
+    return cooldown;
+}
+
+float Hero::att_Cooldown(int baseCooldown) const{
+    float cooldown = baseCooldown - (get_speed() * 0.05f);
+
+    return cooldown;
+}
+
 void Hero::attack(Character& target, int att_dmg){
-    Character::attack(target, att_dmg);
+    int dmg = add_dmg(att_dmg);
+
+    Character::attack(target, dmg);
     
     std::cout << "u attacked !! with: "<< att_dmg << "\n";
     std::cout  << target.get_name() << " HP: " << target.get_hp() << "\n\n";
@@ -85,91 +97,44 @@ void Villan::attack(Character& target, int att_dmg){
     std::cout << "ur HP: " << target.get_hp() << "\n\n";
 }
 
-int Hero::add_dmg(){
+int Hero::add_dmg(int att_dmg){
     int nbr = random_nbr(0, 20);
-    int bonus_att = (nbr * get_att())/100;
+    int bonus_att = (nbr * att_dmg)/100;
 
-    return bonus_att + get_att();
+    return bonus_att + att_dmg;
 }
 
-bool Hero::hero_dodged(){
-    std::string input;
+float Hero::dodge_warning(int baseWarning) const{
+    float warning = baseWarning * (1 + get_speed() * 0.1f);
 
-    auto start = std::chrono::steady_clock::now();
-
-    do{
-        std::cout <<"u have 3 sec to dodge the villan attack! press D !!";
-        std::cin >> input;
-    }while(input != "d" && input != "D");
-
-    auto end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed = end - start;
-
-    return elapsed.count() <= 3;
+    return warning;
 }
 
-void Hero::use_ability(Villan& target, int ability){
-    return;
+void Hero::use_ability(Villan& target){return;}
+
+void Mage::use_ability(Villan& target){
+        std::cout << "u've used the double attack!\n";
+
+        Character::attack(target, get_abiVal());
 }
 
-void Mage::use_ability(Villan &target, int ability){
-    int nbr_uta = get_abilities().size();
-    if(ability > nbr_uta){
-        std::cout << "u have no shuch ability like this!!\n";
-    }else{
-        switch(ability){
-            case 1:
-                std::cout << "u've used the double attack!\n";
-                Character::attack(target, get_att()*2);
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-        }
+void Spartan::use_ability(Villan& target){
+    std::cout << "u've used ur sheiled to tackle " << target.get_name() 
+              << "\nnow he's stant for 5sec !\n";
 
-    }
+    Character::attack(target, get_abiVal());
+    target.set_stunned(true);
 }
+int hitNbr = 3;
+void Assassin::use_ability(Villan& target){
+    std::cout << "u've used srowded steps\n";
 
-void Spartan::use_ability(Villan &target, int ability){
-    int nbr_uta = get_abilities().size();
-    if(ability > nbr_uta){
-        std::cout << "u have no shuch ability like this!!\n";
-    }else{
-        switch(ability){
-            case 1:
-                std::cout << "u've used ur sheiled to tackle " << target.get_name() << 
-                "\nnow he's stant for 5sec !\n";
+    int dmg = add_dmg(get_att()/2);
 
-                target.set_stunned(true);
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-        }
-    }
-}
+    target.set_hp(target.get_hp() - (dmg*4));
 
-void Assassin::use_ability(Villan &target, int ability){
-    int nbr_uta = get_abilities().size();
-    if(ability > nbr_uta){
-        std::cout << "u have no shuch ability like this!!\n";
-    }else{
-        switch(ability){
-            case 1:
-                std::cout << "u've used srowded steps\n";
-                for(int i = 0; i<4; i++){
-                    Character::attack(target, get_att()/2);
-                }
-                break;
-            case 2:
-                break;
-            case 3:
-                break;
-        }
-
-    }
+    std::cout << "u've attacked " << hitNbr << " times, with " 
+              << hitNbr*dmg << ", u were to fast the villan couldn't deffend!!";
 }
 
 void Character::hpBar() const{
@@ -193,4 +158,78 @@ void Hero::show_stats() const{
               << "\n* Speed : " << get_speed() << "\n";
 
     Character::hpBar();
+}
+
+void Hero::generate_upgrade(){
+    std::cout << "after defeating the Boss u've got 2 upgrage for ur ability to choose from : ";
+}
+
+void Mage::generate_upgrade(){
+    Hero::generate_upgrade();
+
+    int bonusPower = random_nbr(10, 15);
+
+    std::cout << "1: power increase by" << bonusPower <<"%\n"
+              << "2: cooldown decrease by 1sec\n";
+
+    int input = input_check();
+
+    switch(input){
+        case 1:{
+            int power = get_abiVal();
+            int addPower = power + ((power*bonusPower)/100);
+
+            set_abiVal(addPower);
+            break;
+        }
+        case 2:{
+            set_abiCooldown(get_abiCooldown()-1);
+            break;
+        }
+    }
+}
+
+void Spartan::generate_upgrade(){
+    Hero::generate_upgrade();
+
+    int bonusPower = random_nbr(5, 10);
+
+    std::cout << "1: stun time increase by 1sec\n"
+              << "2: tackl power increase by " << bonusPower <<"%\n";
+
+    int input = input_check();
+
+    switch(input){
+        case 1:{
+            set_abiCooldown(get_abiCooldown()+1);
+            break;
+        }
+        case 2:{
+            int power = get_abiVal();
+            int addPower = power + ((power*bonusPower)/100);
+
+            set_abiVal(addPower);
+            break;
+        }
+    }
+}
+
+void Assassin::generate_upgrade(){
+    Hero::generate_upgrade();
+
+    std::cout << "1: hits increase by one\n"
+              << "2: cooldown decrease by 1sec\n";
+
+    int input = input_check();
+
+    switch(input){
+        case 1:{
+            hitNbr++;
+            break;
+        }
+        case 2:{
+            set_abiCooldown(get_abiCooldown()-1);
+            break;
+        }
+    }
 }

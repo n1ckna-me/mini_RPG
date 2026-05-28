@@ -35,43 +35,55 @@ class Character{
         virtual void take_damage(int dmg);
         virtual void attack(Character& target, int att_dmg);
         void hpBar() const;
+        virtual float att_Cooldown(int baseCooldown) const;
 };
 
 class Hero : public Character{
     private:
-        std::vector<int> abilities; 
+        int abiVal;
+        int abiCooldown;
     public:
-        Hero(std::string name, int hp, int speed, int att, int def, int maxHp, std::vector <int> abilities)
-            : Character(name, hp, speed, att, def, maxHp),
-            abilities(abilities) {}
+        Hero(std::string name, int hp, int speed, int att, int def, int maxHp, int abiVal, int abiCooldown)
+            : Character(name, hp, speed, att, def, maxHp), abiVal(abiVal), abiCooldown(abiCooldown) {}
 
-        void set_abilitie(std::vector<int> abilities);
-        std::vector<int> get_abilities() const;
+        void set_abiVal(int abiVal);
+        void set_abiCooldown(int abiCooldown);
 
-        int add_dmg();
+        int get_abiVal() const;
+        int get_abiCooldown() const;
+    
+        int add_dmg(int att_dmg);
         void attack(Character& target, int att_dmg) override;
-        bool hero_dodged();
-        virtual void use_ability(Villan& target, int ability);
+        float att_Cooldown(int baseCooldown) const override;
+        virtual void use_ability(Villan& target);
+        virtual void generate_upgrade();
         void show_stats() const;
+        float dodge_warning(int baseWarning) const;
 };
 
 class Mage : public Hero{
     public:
-        Mage(std::string name, int hp, int speed, int att, int def, int maxHp, std::vector <int> abilities)
-            : Hero(name, hp, speed, att, def, maxHp, abilities) {}
-        void use_ability(Villan& target, int ability) override;
+        Mage(std::string name, int hp, int speed, int att, int def, int maxHp, int abi_val, int abiCooldown)
+            : Hero(name, hp, speed, att, def, maxHp, abi_val, abiCooldown) {}
+
+        void use_ability(Villan& target) override;
+        void generate_upgrade() override;
 };
 class Spartan : public Hero{
     public:
-        Spartan(std::string name, int hp, int speed, int att, int def, int maxHp, std::vector <int> abilities)
-            : Hero(name, hp, speed, att, def, maxHp, abilities) {}
-        void use_ability(Villan& target, int ability) override;
+        Spartan(std::string name, int hp, int speed, int att, int def, int maxHp, int abi_val, int abiCooldown)
+            : Hero(name, hp, speed, att, def, maxHp, abi_val, abiCooldown) {}
+
+        void use_ability(Villan& target) override;
+        void generate_upgrade() override;
 };
 class Assassin : public Hero{
     public:
-        Assassin(std::string name, int hp, int speed, int att, int def, int maxHp, std::vector <int> abilities)
-            : Hero(name, hp, speed, att, def, maxHp, abilities) {}
-        void use_ability(Villan& target, int ability) override;
+        Assassin(std::string name, int hp, int speed, int att, int def, int maxHp, int abi_val, int abiCooldown)
+            : Hero(name, hp, speed, att, def, maxHp, abi_val, abiCooldown) {}
+
+        void use_ability(Villan& target) override;
+        void generate_upgrade() override;
 };
 
 class Villan : public Character{
@@ -90,21 +102,21 @@ class Villan : public Character{
 
 class Boss1 : public Villan{
     public:
-        Boss1() /*name("Velthorax"), hp(300), speed(10), att(25), def(10), maxHp(300)*/
+        Boss1()
             :  Villan("Velthorax", 300, 10, 25, 10, 300) {}
 
 };
 
 class Boss2 : public Villan{
     public:
-        Boss2()/*name("Drakmor"), hp(350), speed(10), att(30), def(5), maxHp(350)*/
+        Boss2()
             : Villan("Drakmor", 350, 10, 30, 5, 350) {}
 
 };
 
 class Boss3 : public Villan{
     public:
-        Boss3()/*name("King Ragnarok"), hp(400), speed(15), att(40), def(15), maxHp(400)*/
+        Boss3()
             : Villan("King Ragnarok", 400, 15, 40, 15, 400) {}
 
 };

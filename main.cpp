@@ -2,20 +2,41 @@
 #include<string>
 #include<conio.h>
 #include<chrono>
+#include<random>
 #include<cstdlib>
-#include "Characters.h"
 #include "bonus.h"
 
-int random_nbr(int min, int max);
+std::mt19937 gen(std::random_device{}());
 
-bool timer(int sec, auto& last){
+int random_nbr(int min, int max){
+    std::uniform_int_distribution<> dist(min, max);
+    return dist(gen);
+}
+
+bool timer(float sec, auto& last){
     auto curTime = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(curTime - last).count();
+    auto elapsed = std::chrono::duration<float>(curTime - last).count();
 
-    if(elapsed >= sec){
-        return true;
-    }
-    return false;
+    return elapsed >= sec;
+}
+
+int input_check(){
+    int input;
+
+    do{
+        std::cout << "to chouse type the convinient int : ";
+        std::cin >> input;
+
+        if(std::cin.fail()){
+            std::cin.clear();
+            std::cin.ignore(1000, '\n');
+
+            std::cout << "invalid input!\n";
+            input = -1;
+        }
+    }while(input < 0 || input > 3);
+
+    return input;
 }
 
 int main(){
@@ -25,36 +46,26 @@ int main(){
 
     std::cout << "u r the hero how can save the kingdome!\n" <<
                 "choose ur hero (1-Mage, 2-Spartan, 3-Assassin)\n";
-    do{
-        std::cout << "to chouse type the convinient int to the hero : ";
-        std::cin >> intInput;
 
-        if(std::cin.fail()){
-            std::cin.clear();
-            std::cin.ignore(1000, '\n');
-
-            std::cout << "invalid input!\n";
-            intInput = -1;
-        }
-    }while(intInput < 0 || intInput > 3);
+    intInput = input_check();
 
     switch(intInput){
         case 1 :{
-            hero = new Mage("Mage", 200, 5, 20, 10, 200, {1});
+            hero = new Mage("Mage", 200, 5, 20, 10, 200, 20, 4);
             std::cout << "the Mage has the bigest hp, the harest attack,\n" <<
                 "but she's slow and her defence is mid.\n" <<
                 "Her specila attack is to double her attack!!";
             break;
         }
         case 2 :{
-            hero = new Spartan("Spartan", 200, 3, 15, 15, 200, {1});
+            hero = new Spartan("Spartan", 200, 3, 15, 15, 200, 15, 4);
             std::cout << "The Spartan has mid hp and attack, but he has the heviest sheiled\n" <<
                 "and of cours that slow him down!\n" <<
                 "His special attack is to tackel the villan and stun him for 5sec!!";
             break;
         }
         case 3 :{
-            hero = new Assassin("Assassin", 200, 10, 15, 5, 200, {1});
+            hero = new Assassin("Assassin", 200, 10, 15, 5, 200, 15, 4);
             std::cout << "The Assassin the quick one, allthought he has a mid hp and a light sheild,\n" <<
                 "but his speed give him the ability to dodge and attack multiple time.\n" <<
                 "his spicial attack is to attack 4 time in row with half the power!\n";
@@ -83,31 +94,31 @@ int main(){
     while(v.is_alive() && hero->is_alive()){
 
         if(!att_cooldown){
-            if(timer(1, lastAtt)){
+            if(timer(hero->att_Cooldown(3), lastAtt)){
                 att_cooldown = true;
             }
         }
         if(!villan_att){
-            if(timer(2, lastVillAtt) && !warning){
+            if(timer(hero->dodge_warning(2), lastVillAtt) && !warning){
                 std::cout << "dodge!!\n";
                 warning = true;
             }
-            if (timer(3, lastVillAtt)){
+            if (timer(v.att_Cooldown(4), lastVillAtt)){
                 villan_att = true;
             }
         }
         if(!abi_cooldown){
-            if(timer(3, lastAbi) && !v.get_stunned()){
+            if(timer(hero->get_abiCooldown(), lastAbi) && !v.get_stunned()){
                 abi_cooldown = true;
             }
         }
         if(v.get_stunned()){
-            if(timer(5, lastAbi)){
+            if(timer(hero->get_abiCooldown(), lastAbi)){
                 v.set_stunned(false);
             }
         }
         if(!render){
-            if(timer(1, lastRender)){
+            if(timer(3, lastRender)){
                 render = true;
             }
         }
@@ -121,9 +132,7 @@ int main(){
                     lastAtt = std::chrono::steady_clock::now();
 
                     std::cout << "Attack!\n";
-
-                    int dmg = hero->add_dmg();
-                    hero->attack(v, dmg);
+                    hero->attack(v, hero->get_att());
 
                     
                     att_cooldown = false;
@@ -133,18 +142,16 @@ int main(){
             }
 
             if(key == 'd' || key == 'D'){
-                if(warning){
+                if(warning && !dodged){
                     std::cout << "dodged in time!\n";
                     dodged = true;
-                }else{
-                    dodged = false;
                 }
             }
 
             if(key == 'e' || key == 'E'){
                 if(abi_cooldown){
                     lastAbi = std::chrono::steady_clock::now();
-                    hero->use_ability(v, 1);
+                    hero->use_ability(v);
                     
                     abi_cooldown = false;
                 }else{
@@ -169,25 +176,27 @@ int main(){
             }
         }
 
-        if(render){
+        /*if(render){
             lastRender = std::chrono::steady_clock::now();
 
             hero->hpBar();
             v.hpBar();
             render = false;
-        }
+        }*/
     }
 
     Bonus heal(BonusType::heal, random_nbr(40, 80));
     Bonus att(BonusType::att, random_nbr(5, 15));
     Bonus def(BonusType::def, random_nbr(5, 20));
+    Bonus speed(BonusType::speed, random_nbr(5,10));
 
-    std::cout << "u've killed the monster, and now u have 3 bonuses to choose from :\n"
+    std::cout << "u've killed the monster, and now u have 4 bonuses to choose from :\n"
               << "1: healing " << heal.get_value() << "%\n"
               << "2: attack increase " << att.get_value() << "%\n"
               << "3: defense increase " << def.get_value() << "%\n"
-              << "choose the convient nbr :";
-    std::cin >> intInput;
+              << "4: speed increase " << def.get_value() << "%\n";
+    
+    intInput = input_check();
 
     switch(intInput){
         case 1:
@@ -198,6 +207,9 @@ int main(){
             break;
         case 3:
             def.apply(*hero);
+            break;
+        case 4:
+            speed.apply(*hero);
             break;
     }
 
