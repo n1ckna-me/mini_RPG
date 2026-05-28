@@ -5,7 +5,8 @@
 enum class BonusType{
     heal,
     att,
-    def
+    def,
+    speed
 };
 
 class Bonus{

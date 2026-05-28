@@ -12,10 +12,10 @@ void Bonus::apply(Hero &hero){
     switch(get_type()){
 
         case BonusType::heal:{
-            int addHp
+            int addHp;
             int hp = hero.get_hp();
             if(hp <= 0){
-                add = hp + ((hero.get_maxHp()*get_value()/100));
+                addHp = hp + ((hero.get_maxHp()*get_value()/100));
             }else{
                 addHp = hp + ((hp*get_value())/100);
             }
@@ -39,6 +39,13 @@ void Bonus::apply(Hero &hero){
             int addDef = def + ((def*get_value())/100);
 
             hero.set_def(addDef);
+            break;
+        }
+        case BonusType::speed:{
+            int speed = hero.get_speed();
+            int addSpeed = speed + ((speed*get_value())/100);
+
+            hero.set_speed(addSpeed);
             break;
         }
     }
