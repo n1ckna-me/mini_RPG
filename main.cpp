@@ -25,7 +25,7 @@ int main(){
             break;
         }
         case 2 :{
-            hero = new Spartan("Spartan", 200, 3, 15, 15, 200, 15, 4);
+            hero = new Spartan("Spartan", 200, 3, 15, 15, 200, 5, 4);
             std::cout << "The Spartan has mid hp and attack, but he has the heviest sheiled\n" <<
                 "and of cours that slow him down!\n" <<
                 "His special attack is to tackel the villan and stun him for 5sec!!";
