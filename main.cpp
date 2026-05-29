@@ -1,43 +1,10 @@
 #include<iostream>
 #include<string>
-#include<conio.h>
 #include<chrono>
 #include<random>
-#include<cstdlib>
-#include "bonus.h"
-
-std::mt19937 gen(std::random_device{}());
-
-int random_nbr(int min, int max){
-    std::uniform_int_distribution<> dist(min, max);
-    return dist(gen);
-}
-
-bool timer(float sec, auto& last){
-    auto curTime = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration<float>(curTime - last).count();
-
-    return elapsed >= sec;
-}
-
-int input_check(){
-    int input;
-
-    do{
-        std::cout << "to chouse type the convinient int : ";
-        std::cin >> input;
-
-        if(std::cin.fail()){
-            std::cin.clear();
-            std::cin.ignore(1000, '\n');
-
-            std::cout << "invalid input!\n";
-            input = -1;
-        }
-    }while(input < 0 || input > 3);
-
-    return input;
-}
+#include<thread>
+#include "stage.h"
+#include "tools.h"
 
 int main(){
     std::string input;
@@ -47,7 +14,7 @@ int main(){
     std::cout << "u r the hero how can save the kingdome!\n" <<
                 "choose ur hero (1-Mage, 2-Spartan, 3-Assassin)\n";
 
-    intInput = input_check();
+    intInput = input_check(3);
 
     switch(intInput){
         case 1 :{
@@ -72,148 +39,84 @@ int main(){
             break;
         }
     };
-
-    Villan v("Monster", 50, 5, 30, 10, 50);
     std::cout << "\n";
 
     std::cout << "a: Attack\n"
                 "d: dodge\n"
-                "e: spical attack\n";
+                "e: spical attack\n"
+                "s: show stats\n";
 
-    bool att_cooldown = true;
-    bool villan_att = false;
-    bool dodged = false;
-    bool warning = false;
-    bool abi_cooldown = true;
-    bool render = true;
-    auto lastAtt = std::chrono::steady_clock::now();
-    auto lastVillAtt = std::chrono::steady_clock::now();
-    auto lastAbi = std::chrono::steady_clock::now();
-    auto lastRender = std::chrono::steady_clock::now();
+    std::this_thread::sleep_for(std::chrono::seconds(4));
 
-    while(v.is_alive() && hero->is_alive()){
+    Stage* stage1 = NULL;
+    Stage* stage2 = NULL;
+    Stage* stage3 = NULL;
 
-        if(!att_cooldown){
-            if(timer(hero->att_Cooldown(3), lastAtt)){
-                att_cooldown = true;
-            }
+    stage1 = new Stage(Floor::floor1, 0, hero, false);
+
+    stage1->startStage(hero);
+
+    if(stage1->get_completed()){
+
+        if(hero->is_alive()){
+            std::cout << "after finishing first floor in ";
+
+            time_converter(stage1->get_time());
+
+            std::cout <<",\nu moved to the next one.\n"
+                      << "now ur up to some new monsters\n";
+
+            stage2 = new Stage(Floor::floor2, 0, hero, false);
+        }else{
+            std::cout << "YOU DIED!";
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            return 0;
         }
-        if(!villan_att){
-            if(timer(hero->dodge_warning(2), lastVillAtt) && !warning){
-                std::cout << "dodge!!\n";
-                warning = true;
-            }
-            if (timer(v.att_Cooldown(4), lastVillAtt)){
-                villan_att = true;
-            }
-        }
-        if(!abi_cooldown){
-            if(timer(hero->get_abiCooldown(), lastAbi) && !v.get_stunned()){
-                abi_cooldown = true;
-            }
-        }
-        if(v.get_stunned()){
-            if(timer(hero->get_abiCooldown(), lastAbi)){
-                v.set_stunned(false);
-            }
-        }
-        if(!render){
-            if(timer(3, lastRender)){
-                render = true;
-            }
-        }
-
-        if(_kbhit()){
-
-            char key = _getch();
-
-            if(key == 'a' || key == 'A'){
-                if(att_cooldown){
-                    lastAtt = std::chrono::steady_clock::now();
-
-                    std::cout << "Attack!\n";
-                    hero->attack(v, hero->get_att());
-
-                    
-                    att_cooldown = false;
-                }else{
-                    std::cout << "on cooldown!\n";
-                }
-            }
-
-            if(key == 'd' || key == 'D'){
-                if(warning && !dodged){
-                    std::cout << "dodged in time!\n";
-                    dodged = true;
-                }
-            }
-
-            if(key == 'e' || key == 'E'){
-                if(abi_cooldown){
-                    lastAbi = std::chrono::steady_clock::now();
-                    hero->use_ability(v);
-                    
-                    abi_cooldown = false;
-                }else{
-                    std::cout << "on cooldown!\n";
-                }
-            }
-        }
-
-        if(villan_att && !v.get_stunned()){
-            if(!dodged){
-                lastVillAtt = std::chrono::steady_clock::now();
-
-                v.attack(*hero, v.get_att());
-                villan_att = false;
-                warning = false;
-            }else{
-                lastVillAtt = std::chrono::steady_clock::now();
-
-                warning = false;
-                villan_att = false;
-                dodged = false;
-            }
-        }
-
-        /*if(render){
-            lastRender = std::chrono::steady_clock::now();
-
-            hero->hpBar();
-            v.hpBar();
-            render = false;
-        }*/
     }
 
-    Bonus heal(BonusType::heal, random_nbr(40, 80));
-    Bonus att(BonusType::att, random_nbr(5, 15));
-    Bonus def(BonusType::def, random_nbr(5, 20));
-    Bonus speed(BonusType::speed, random_nbr(5,10));
+    delete stage1;
+    stage2->startStage(hero);
 
-    std::cout << "u've killed the monster, and now u have 4 bonuses to choose from :\n"
-              << "1: healing " << heal.get_value() << "%\n"
-              << "2: attack increase " << att.get_value() << "%\n"
-              << "3: defense increase " << def.get_value() << "%\n"
-              << "4: speed increase " << def.get_value() << "%\n";
-    
-    intInput = input_check();
+    if(stage2->get_completed()){
 
-    switch(intInput){
-        case 1:
-            heal.apply(*hero);
-            break;
-        case 2:
-            att.apply(*hero);
-            break;
-        case 3:
-            def.apply(*hero);
-            break;
-        case 4:
-            speed.apply(*hero);
-            break;
+        if(hero->is_alive()){
+            std::cout << "after finishing second floor in "; 
+
+            time_converter(stage2->get_time()) ;
+
+            std::cout <<",\nu moved to the next one.\n"
+                      << "now ur up to some new monsters\n";
+
+            stage3 = new Stage(Floor::floor3, 0, hero, false);
+        }else{
+            std::cout << "YOU DIED!";
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            return 0;
+        }
     }
 
-    hero->show_stats();
+    delete stage2;
+    stage3->startStage(hero);
 
+    if(stage3->get_completed()){
+
+        if(hero->is_alive()){
+            std::cout << "after finishing third floor in ";
+
+            time_converter(stage3->get_time());
+
+            std::cout <<"\nu managed to get cure of the curse from the King Ragnarok\n"
+                      << "now u returned to kingdem with some big news\n"
+                      << "gongratse u've finished the game! thanks for playin!\n";
+            
+            std::this_thread::sleep_for(std::chrono::seconds(4));
+        }else{
+            std::cout << "YOU DIED!";
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
+    }
+
+    delete stage3;
+    delete hero;
     return 0;
 }
