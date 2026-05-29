@@ -36,6 +36,7 @@ class Character{
         virtual void attack(Character& target, int att_dmg);
         void hpBar() const;
         virtual float att_Cooldown(int baseCooldown) const;
+        void show_stats() const;
 };
 
 class Hero : public Character{
@@ -57,7 +58,6 @@ class Hero : public Character{
         float att_Cooldown(int baseCooldown) const override;
         virtual void use_ability(Villan& target);
         virtual void generate_upgrade();
-        void show_stats() const;
         float dodge_warning(int baseWarning) const;
 };
 

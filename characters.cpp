@@ -1,9 +1,7 @@
 #include<iostream>
 #include<chrono>
+#include "tools.h"
 #include "Characters.h"
-
-int random_nbr(int min, int max);
-int input_check();
 
 Character::Character(std::string name, int hp, int speed, int att, int def, int maxHp){
     this -> name = name;
@@ -105,7 +103,7 @@ int Hero::add_dmg(int att_dmg){
 }
 
 float Hero::dodge_warning(int baseWarning) const{
-    float warning = baseWarning * (1 + get_speed() * 0.1f);
+    float warning = baseWarning - (get_speed() * 0.05f);
 
     return warning;
 }
@@ -151,8 +149,8 @@ void Character::hpBar() const{
     std::cout << "]\n";
 }
 
-void Hero::show_stats() const{
-    std::cout << "Hero stats ("<< get_name() <<") : \n"
+void Character::show_stats() const{
+    std::cout << get_name() <<" stats ("<< get_name() <<") : \n"
               <<"* Attack : " << get_att()
               << "\n* Defense : " << get_def()
               << "\n* Speed : " << get_speed() << "\n";
@@ -172,7 +170,7 @@ void Mage::generate_upgrade(){
     std::cout << "1: power increase by" << bonusPower <<"%\n"
               << "2: cooldown decrease by 1sec\n";
 
-    int input = input_check();
+    int input = input_check(2);
 
     switch(input){
         case 1:{
@@ -197,7 +195,7 @@ void Spartan::generate_upgrade(){
     std::cout << "1: stun time increase by 1sec\n"
               << "2: tackl power increase by " << bonusPower <<"%\n";
 
-    int input = input_check();
+    int input = input_check(2);
 
     switch(input){
         case 1:{
@@ -220,7 +218,7 @@ void Assassin::generate_upgrade(){
     std::cout << "1: hits increase by one\n"
               << "2: cooldown decrease by 1sec\n";
 
-    int input = input_check();
+    int input = input_check(2);
 
     switch(input){
         case 1:{
