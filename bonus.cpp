@@ -2,6 +2,7 @@
 #include<vector>
 #include "bonus.h"
 #include "Characters.h"
+#include "tools.h"
 
 void Bonus::set_value(int val){this->value = val;}
 
@@ -14,11 +15,9 @@ void Bonus::apply(Hero &hero){
         case BonusType::heal:{
             int addHp;
             int hp = hero.get_hp();
-            if(hp <= 0){
-                addHp = hp + ((hero.get_maxHp()*get_value()/100));
-            }else{
-                addHp = hp + ((hp*get_value())/100);
-            }
+            
+            int healAmount = (hero.get_maxHp() * get_value()) / 100;
+            addHp = healAmount + hp;
 
             if(addHp > hero.get_maxHp()){
                 addHp = hero.get_maxHp();
