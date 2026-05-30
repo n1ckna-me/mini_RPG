@@ -1,7 +1,7 @@
 #include<iostream>
 #include<chrono>
 #include "tools.h"
-#include "Characters.h"
+#include "characters.h"
 
 Character::Character(std::string name, int hp, int speed, int att, int def, int maxHp){
     this -> name = name;
