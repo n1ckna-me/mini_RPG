@@ -69,6 +69,8 @@ int main(){
             stage2 = new Stage(Floor::floor2, 0, hero, false);
         }else{
             std::cout << "YOU DIED!";
+            delete stage1;
+            delete hero;
             std::this_thread::sleep_for(std::chrono::seconds(2));
             return 0;
         }
@@ -90,6 +92,8 @@ int main(){
             stage3 = new Stage(Floor::floor3, 0, hero, false);
         }else{
             std::cout << "YOU DIED!";
+            delete stage2;
+            delete hero;
             std::this_thread::sleep_for(std::chrono::seconds(2));
             return 0;
         }
@@ -112,7 +116,10 @@ int main(){
             std::this_thread::sleep_for(std::chrono::seconds(4));
         }else{
             std::cout << "YOU DIED!";
+            delete stage3;
+            delete hero;
             std::this_thread::sleep_for(std::chrono::seconds(2));
+            return 0;
         }
     }
 
