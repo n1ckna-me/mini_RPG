@@ -15,9 +15,9 @@ void Stage::addEnemy(Villan *enemy){enemies.push_back(enemy);}
 
 void Stage::bonus_sys(Hero *hero){
     Bonus heal(BonusType::heal, random_nbr(40, 80));
-    Bonus att(BonusType::att, random_nbr(5, 15));
-    Bonus def(BonusType::def, random_nbr(5, 20));
-    Bonus speed(BonusType::speed, random_nbr(5,10));
+    Bonus att(BonusType::att, random_nbr(10, 20));
+    Bonus def(BonusType::def, random_nbr(10, 20));
+    Bonus speed(BonusType::speed, random_nbr(10,15));
 
     std::cout << "u've killed the monster, and now u have 4 bonuses to choose from :\n"
               << "1: healing " << heal.get_value() << "%\n"
