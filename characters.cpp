@@ -167,7 +167,7 @@ void Mage::generate_upgrade(){
 
     int bonusPower = random_nbr(10, 15);
 
-    std::cout << "1: power increase by" << bonusPower <<"%\n"
+    std::cout << "\n1: power increase by" << bonusPower <<"%\n"
               << "2: cooldown decrease by 1sec\n";
 
     int input = input_check(2);
@@ -192,7 +192,7 @@ void Spartan::generate_upgrade(){
 
     int bonusPower = random_nbr(5, 10);
 
-    std::cout << "1: stun time increase by 1sec\n"
+    std::cout << "\n1: stun time increase by 1sec\n"
               << "2: tackl power increase by " << bonusPower <<"%\n";
 
     int input = input_check(2);
@@ -215,7 +215,7 @@ void Spartan::generate_upgrade(){
 void Assassin::generate_upgrade(){
     Hero::generate_upgrade();
 
-    std::cout << "1: hits increase by one\n"
+    std::cout << "\n1: hits increase by one\n"
               << "2: cooldown decrease by 1sec\n";
 
     int input = input_check(2);
