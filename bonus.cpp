@@ -1,7 +1,7 @@
 #include<iostream>
 #include<vector>
 #include "bonus.h"
-#include "Characters.h"
+#include "characters.h"
 #include "tools.h"
 
 void Bonus::set_value(int val){this->value = val;}
