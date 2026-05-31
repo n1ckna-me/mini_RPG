@@ -113,7 +113,7 @@ void Hero::use_ability(Villan& target){return;}
 void Mage::use_ability(Villan& target){
         std::cout << "u've used the double attack!\n";
 
-        Character::attack(target, get_abiVal());
+        Character::attack(target, get_abiVal()*2);
 }
 
 void Spartan::use_ability(Villan& target){
